@@ -93,7 +93,6 @@
 
   navigator.mozApps.mgmt.onenabledstatechange = function(event) {
     var app = event.application;
-    console.log('onenabledstatechange', app.manifestURL);
     if (app.manifestURL.indexOf(MANIFEST_URL) > 0 && !app.enabled) {
       uninitialize();
     }
