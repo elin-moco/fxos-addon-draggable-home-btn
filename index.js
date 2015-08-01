@@ -1,4 +1,4 @@
-(function () {
+(function ($$) {
   var MANIFEST_URL = '/fxos-addon-draggable-home-btn/manifest.webapp';
 
   // If injecting into an app that was already running at the time
@@ -14,11 +14,17 @@
     window.addEventListener('DOMContentLoaded', initialize);
   }
 
+  function onScreenLocked() {
+    var existingContainerEl = $$('draggable-home');
+    existingContainerEl.style.visibility = 'hidden';
+  }
+
+  function onScreenUnlocked() {
+    var existingContainerEl = $$('draggable-home');
+    existingContainerEl.style.visibility = 'visible';
+  }
+
   function initialize() {
-
-    // Just a small shortcut to repeat myself less
-    var $$ = document.getElementById.bind(document);
-
     // Remove existing control, for when this addon is re-run.
     var existingContainerEl = $$('draggable-home');
     if (existingContainerEl) {
@@ -82,13 +88,15 @@
     });
     // Inject the elements into the system app
     $$('screen').appendChild(containerEl);
+    window.addEventListener('lockscreen-appclosed', onScreenUnlocked);
+    window.addEventListener('lockscreen-appopened', onScreenLocked);
   }
   
   function uninitialize() {
-    var $$ = document.getElementById.bind(document);
-
     var existingContainerEl = $$('draggable-home');
     existingContainerEl.parentNode.removeChild(existingContainerEl);
+    window.removeEventListener('lockscreen-appclosed', onScreenUnlocked);
+    window.removeEventListener('lockscreen-appopened', onScreenLocked);
   }
 
   navigator.mozApps.mgmt.onenabledstatechange = function(event) {
@@ -97,4 +105,4 @@
       uninitialize();
     }
   };
-}());
+}(document.getElementById.bind(document)));
