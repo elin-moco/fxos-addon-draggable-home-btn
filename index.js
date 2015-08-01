@@ -1,5 +1,7 @@
 (function ($$) {
   var MANIFEST_URL = '/fxos-addon-draggable-home-btn/manifest.webapp';
+  var TAP_THRESHOLD = 18;
+  var LONG_TAP_THRESHOLD = 36;
 
   // If injecting into an app that was already running at the time
   // the app was enabled, simply initialize it.
@@ -50,7 +52,7 @@
       btnRight = parseInt(containerEl.style.right);
       btnBottom = parseInt(containerEl.style.bottom);
       holdTimer = setTimeout(function() {
-        if (dragging && movement < 20) {
+        if (dragging && movement < LONG_TAP_THRESHOLD) {
           window.navigator.vibrate(50);
           window.dispatchEvent(new CustomEvent('holdhome'));
         }
@@ -64,22 +66,24 @@
       var absX = Math.abs(dragMoveX);
       var absY = Math.abs(dragMoveY);
       movement += absX + absY;
-      if (absX > 0) {
-        containerEl.style.right = btnRight - dragMoveX + 'px';
-      }
-      else {
-        containerEl.style.right = btnRight + 'px';
-      }
-      if (absY > 0) {
-        containerEl.style.bottom = btnBottom - dragMoveY + 'px';
-      }
-      else {
-        containerEl.style.bottom = btnBottom + 'px';
+      if (movement > TAP_THRESHOLD) {
+        if (absX > 0) {
+          containerEl.style.right = btnRight - dragMoveX + 'px';
+        }
+        else {
+          containerEl.style.right = btnRight + 'px';
+        }
+        if (absY > 0) {
+          containerEl.style.bottom = btnBottom - dragMoveY + 'px';
+        }
+        else {
+          containerEl.style.bottom = btnBottom + 'px';
+        }
       }
     });
     containerEl.addEventListener('touchend', function(evt) {
       evt.stopImmediatePropagation();
-      if (movement < 10 && (new Date().getTime() - touchTime) < 300) {
+      if (movement < TAP_THRESHOLD && (new Date().getTime() - touchTime) < 300) {
         window.navigator.vibrate(50);
         window.dispatchEvent(new CustomEvent('home'));
       }
