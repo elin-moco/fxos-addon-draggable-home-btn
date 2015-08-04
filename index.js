@@ -1,9 +1,9 @@
 /* global ScreenLayout, Event */
 
-(function ($$) {
+(function($$) {
   var MANIFEST_URL = '/fxos-addon-draggable-home-btn/manifest.webapp';
-  var TAP_THRESHOLD = 10;
-  var LONG_TAP_THRESHOLD = 20;
+  var TAP_THRESHOLD = 18;
+  var LONG_TAP_THRESHOLD = 36;
   var _lock;
 
   // If injecting into an app that was already running at the time
@@ -20,7 +20,9 @@
   }
 
   function sl_getSettingsLock() {
-    if (_lock && !_lock.closed) { return _lock; }
+    if (_lock && !_lock.closed) {
+      return _lock;
+    }
     var settings = window.navigator.mozSettings;
     return (_lock = settings.createLock());
   }
@@ -50,66 +52,128 @@
     containerEl.setAttribute('class', 'visible');
     containerEl.setAttribute('data-time-inserted', Date.now());
     containerEl.setAttribute('data-z-index-level', 'software-buttons');
-    containerEl.setAttribute('style', 'border: 3px solid #FFFFFF; border-radius: 15px; background-color: rgba(255,255,255,0.5); position: fixed; display: block; width: 30px; height: 30px; bottom: 10px; right: '+((window.screen.width-48)/2)+'px; margin: 6px; box-shadow: 1px 1px 3px #000000; z-index: 65537;');
+    containerEl.setAttribute('style', 'border: 3px solid #FFFFFF; border-radius: 15px; background-color: rgba(255,255,255,0.5); position: fixed; display: block; width: 30px; height: 30px; bottom: 10px; right: ' + ((window.screen.width - 48) / 2) + 'px; margin: 6px; box-shadow: 1px 1px 3px #000000; z-index: 65537;');
 
-    var dragStartX, dragStartY, dragMoveX, dragMoveY, btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer;
+    var dragStartX, dragStartY, dragMoveX, dragMoveY, dragDeltaX, dragDeltaY,
+      btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer,
+      deltaQueueX = [], deltaQueueY = [], finalDirectionX, finalDirectionY;
     containerEl.addEventListener('touchstart', function(evt) {
-      dragging = true;
-      movement = 0;
-      touchTime = new Date().getTime();
-      var touches = evt.changedTouches;
-      dragStartX = dragMoveX = touches[0].pageX;
-      dragStartY = dragMoveY = touches[0].pageY;
-      btnRight = parseInt(containerEl.style.right);
-      btnBottom = parseInt(containerEl.style.bottom);
-      holdTimer = setTimeout(function() {
-        if (dragging && movement < LONG_TAP_THRESHOLD) {
-          window.navigator.vibrate(50);
-          window.dispatchEvent(new CustomEvent('holdhome'));
-        }
-      }, 500);
-      evt.preventDefault();
+      try {
+        deltaQueueX = [];
+        deltaQueueY = [];
+        dragging = true;
+        movement = dragMoveX = dragMoveY = finalDirectionX = finalDirectionY = 0;
+        touchTime = new Date().getTime();
+        var touches = evt.changedTouches;
+        dragStartX = touches[0].pageX;
+        dragStartY = touches[0].pageY;
+        btnRight = parseInt(containerEl.style.right);
+        btnBottom = parseInt(containerEl.style.bottom);
+        holdTimer = setTimeout(function() {
+          if (dragging && movement < LONG_TAP_THRESHOLD) {
+            window.navigator.vibrate(50);
+            window.dispatchEvent(new CustomEvent('holdhome'));
+          }
+        }, 500);
+        evt.preventDefault();
+      } catch(e) {
+        console.error(e);
+      }
     });
     containerEl.addEventListener('touchmove', function(evt) {
-      var touches = evt.changedTouches;
-      var dragDeltaX = touches[0].pageX - dragMoveX;
-      var dragDetlaY = touches[0].pageY - dragMoveY;
-      dragMoveX = touches[0].pageX - dragStartX;
-      dragMoveY = touches[0].pageY - dragStartY;
-      var absX = Math.abs(dragDeltaX);
-      var absY = Math.abs(dragDetlaY);
-      movement += absX + absY;
-      if (movement > TAP_THRESHOLD) {
-        if (absX > 0) {
-          var newRight = btnRight - dragMoveX;
-          if (newRight > -6 && newRight < window.screen.width - 42) {
-            containerEl.style.right = newRight + 'px';
-          }
+      try {
+        var touches = evt.changedTouches;
+        dragDeltaX = touches[0].pageX - dragStartX - dragMoveX;
+        if (dragDeltaX != 0) {
+          finalDirectionX = dragDeltaX / Math.abs(dragDeltaX);
         }
+        dragDeltaY = touches[0].pageY - dragStartY - dragMoveY;
+        if (dragDeltaY != 0) {
+          finalDirectionY = dragDeltaY / Math.abs(dragDeltaY);
+        }
+        dragMoveX = touches[0].pageX - dragStartX;
+        dragMoveY = touches[0].pageY - dragStartY;
+        var absX = Math.abs(dragDeltaX);
+        var absY = Math.abs(dragDeltaY);
+        if (deltaQueueX.length > 5) {
+          deltaQueueX.shift();
+        }
+        deltaQueueX.push(absX);
+        if (deltaQueueY.length > 5) {
+          deltaQueueY.shift();
+        }
+        deltaQueueY.push(absY);
+        movement += absX + absY;
+        if (movement > TAP_THRESHOLD) {
+          if (absX > 0) {
+            var newRight = btnRight - dragMoveX;
+            if (newRight > -6 && newRight < window.screen.width - 42) {
+              containerEl.style.right = newRight + 'px';
+            }
+          }
 
-        if (absY > 0) {
-          var newBottom = btnBottom - dragMoveY;
-          if (newBottom > -6 && newBottom < window.screen.height - 42) {
-            containerEl.style.bottom = newBottom + 'px';
+          if (absY > 0) {
+            var newBottom = btnBottom - dragMoveY;
+            if (newBottom > -6 && newBottom < window.screen.height - 42) {
+              containerEl.style.bottom = newBottom + 'px';
+            }
           }
         }
+      } catch(e) {
+        console.error(e);
       }
     });
     containerEl.addEventListener('touchend', function(evt) {
-      evt.stopImmediatePropagation();
-      if (movement < TAP_THRESHOLD && (new Date().getTime() - touchTime) < 300) {
-        window.navigator.vibrate(50);
-        window.dispatchEvent(new CustomEvent('home'));
+      try {
+        var vx = deltaQueueX.reduce(function(a, b) {
+            return a + b;
+          }) / deltaQueueX.length * finalDirectionX * -1;
+        var vy = deltaQueueY.reduce(function(a, b) {
+            return a + b;
+          }) / deltaQueueY.length * finalDirectionY * -1;
+        var divide = Math.abs(vx) + Math.abs(vy);
+        var dx = vx / divide;
+        var dy = vy / divide;
+        function slide() {
+          var x = parseInt(containerEl.style.right);
+          var y = parseInt(containerEl.style.bottom);
+          var nx = x + vx;
+          var ny = y + vy;
+          containerEl.style.right = nx + 'px';
+          if (nx < -6 || nx > window.screen.width - 42) {
+            vx *= -1;
+            dx *= -1;
+          }
+          containerEl.style.bottom = y + vy + 'px';
+          if (ny < -6 || ny > window.screen.height - 42) {
+            vy *= -1;
+            dy *= -1;
+          }
+          vx -= dx;
+          vy -= dy;
+          if (Math.abs(vx) > Math.abs(dx) || Math.abs(vy) > Math.abs(dy)) {
+            window.requestAnimationFrame(slide);
+          }
+        }
+
+        window.requestAnimationFrame(slide);
+        evt.stopImmediatePropagation();
+        if (movement < TAP_THRESHOLD && (new Date().getTime() - touchTime) < 300) {
+          window.navigator.vibrate(50);
+          window.dispatchEvent(new CustomEvent('home'));
+        }
+        dragging = false;
+        clearTimeout(holdTimer);
+      } catch(e) {
+        console.error(e);
       }
-      dragging = false;
-      clearTimeout(holdTimer);
     });
     // Inject the elements into the system app
     $$('screen').appendChild(containerEl);
     window.addEventListener('lockscreen-appclosed', onScreenUnlocked);
     window.addEventListener('lockscreen-appopened', onScreenLocked);
   }
-  
+
   function uninitialize() {
     if (!window.matchMedia('(-moz-physical-home-button)').matches) {
       sl_getSettingsLock().set({'software-button.enabled': true});
