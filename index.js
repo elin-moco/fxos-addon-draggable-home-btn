@@ -2,8 +2,8 @@
 
 (function ($$) {
   var MANIFEST_URL = '/fxos-addon-draggable-home-btn/manifest.webapp';
-  var TAP_THRESHOLD = 18;
-  var LONG_TAP_THRESHOLD = 36;
+  var TAP_THRESHOLD = 10;
+  var LONG_TAP_THRESHOLD = 20;
   var _lock;
 
   // If injecting into an app that was already running at the time
@@ -50,16 +50,16 @@
     containerEl.setAttribute('class', 'visible');
     containerEl.setAttribute('data-time-inserted', Date.now());
     containerEl.setAttribute('data-z-index-level', 'software-buttons');
-    containerEl.setAttribute('style', 'border: 3px solid #FFFFFF; border-radius: 15px; background-color: rgba(255,255,255,0.5); position: fixed; display: block; width: 30px; height: 30px; bottom: 10px; right: '+((window.screen.width-30)/2)+'px; box-shadow: 1px 1px 3px #000000; z-index: 65537;');
+    containerEl.setAttribute('style', 'border: 3px solid #FFFFFF; border-radius: 15px; background-color: rgba(255,255,255,0.5); position: fixed; display: block; width: 30px; height: 30px; bottom: 10px; right: '+((window.screen.width-48)/2)+'px; margin: 6px; box-shadow: 1px 1px 3px #000000; z-index: 65537;');
 
-    var dragStartX, dragStartY, btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer;
+    var dragStartX, dragStartY, dragMoveX, dragMoveY, btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer;
     containerEl.addEventListener('touchstart', function(evt) {
       dragging = true;
       movement = 0;
       touchTime = new Date().getTime();
       var touches = evt.changedTouches;
-      dragStartX = touches[0].pageX;
-      dragStartY = touches[0].pageY;
+      dragStartX = dragMoveX = touches[0].pageX;
+      dragStartY = dragMoveY = touches[0].pageY;
       btnRight = parseInt(containerEl.style.right);
       btnBottom = parseInt(containerEl.style.bottom);
       holdTimer = setTimeout(function() {
@@ -72,23 +72,26 @@
     });
     containerEl.addEventListener('touchmove', function(evt) {
       var touches = evt.changedTouches;
-      var dragMoveX = touches[0].pageX - dragStartX;
-      var dragMoveY = touches[0].pageY - dragStartY;
-      var absX = Math.abs(dragMoveX);
-      var absY = Math.abs(dragMoveY);
+      var dragDeltaX = touches[0].pageX - dragMoveX;
+      var dragDetlaY = touches[0].pageY - dragMoveY;
+      dragMoveX = touches[0].pageX - dragStartX;
+      dragMoveY = touches[0].pageY - dragStartY;
+      var absX = Math.abs(dragDeltaX);
+      var absY = Math.abs(dragDetlaY);
       movement += absX + absY;
       if (movement > TAP_THRESHOLD) {
         if (absX > 0) {
-          containerEl.style.right = btnRight - dragMoveX + 'px';
+          var newRight = btnRight - dragMoveX;
+          if (newRight > -6 && newRight < window.screen.width - 42) {
+            containerEl.style.right = newRight + 'px';
+          }
         }
-        else {
-          containerEl.style.right = btnRight + 'px';
-        }
+
         if (absY > 0) {
-          containerEl.style.bottom = btnBottom - dragMoveY + 'px';
-        }
-        else {
-          containerEl.style.bottom = btnBottom + 'px';
+          var newBottom = btnBottom - dragMoveY;
+          if (newBottom > -6 && newBottom < window.screen.height - 42) {
+            containerEl.style.bottom = newBottom + 'px';
+          }
         }
       }
     });
