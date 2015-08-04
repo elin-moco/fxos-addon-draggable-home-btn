@@ -1,7 +1,10 @@
+/* global ScreenLayout, Event */
+
 (function ($$) {
   var MANIFEST_URL = '/fxos-addon-draggable-home-btn/manifest.webapp';
   var TAP_THRESHOLD = 18;
   var LONG_TAP_THRESHOLD = 36;
+  var _lock;
 
   // If injecting into an app that was already running at the time
   // the app was enabled, simply initialize it.
@@ -16,6 +19,12 @@
     window.addEventListener('DOMContentLoaded', initialize);
   }
 
+  function sl_getSettingsLock() {
+    if (_lock && !_lock.closed) { return _lock; }
+    var settings = window.navigator.mozSettings;
+    return (_lock = settings.createLock());
+  }
+
   function onScreenLocked() {
     var existingContainerEl = $$('draggable-home');
     existingContainerEl.style.visibility = 'hidden';
@@ -27,6 +36,8 @@
   }
 
   function initialize() {
+
+    sl_getSettingsLock().set({'software-button.enabled': false});
     // Remove existing control, for when this addon is re-run.
     var existingContainerEl = $$('draggable-home');
     if (existingContainerEl) {
@@ -97,6 +108,9 @@
   }
   
   function uninitialize() {
+    if (!window.matchMedia('(-moz-physical-home-button)').matches) {
+      sl_getSettingsLock().set({'software-button.enabled': true});
+    }
     var existingContainerEl = $$('draggable-home');
     existingContainerEl.parentNode.removeChild(existingContainerEl);
     window.removeEventListener('lockscreen-appclosed', onScreenUnlocked);
