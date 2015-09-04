@@ -1,0 +1,9 @@
+{
+  "name": "System - Draggable Home Button",
+  "description": "Adds a draggable software home button.",
+  "developer": {
+    "name": "Eddie Lin",
+    "url": "http://yshl.in"
+  },
+  "package_path": "extension.zip"
+}
