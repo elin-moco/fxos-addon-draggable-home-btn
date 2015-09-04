@@ -1,0 +1,13 @@
+#draggable-home {
+    border: 3px solid #FFFFFF;
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.5);
+    position: fixed;
+    display: block;
+    width: 32px;
+    height: 32px;
+    bottom: 10px;
+    margin: 6px;
+    box-shadow: 1px 1px 3px #000000;
+    z-index: 65537;
+}

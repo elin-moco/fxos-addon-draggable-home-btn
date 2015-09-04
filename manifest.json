@@ -6,7 +6,7 @@
   "author": "Eddie Lin",
   "content_scripts": [{
     "matches": "app://system.gaiamobile.org/index.html",
-    "css": [],
+    "css": ["index.css"],
     "js": ["index.js"]
   }],
   "icons": {

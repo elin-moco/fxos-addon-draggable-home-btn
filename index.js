@@ -53,7 +53,7 @@
     containerEl.setAttribute('class', 'visible');
     containerEl.setAttribute('data-time-inserted', Date.now());
     containerEl.setAttribute('data-z-index-level', 'software-buttons');
-    containerEl.setAttribute('style', 'border: 3px solid #FFFFFF; border-radius: 15px; background-color: rgba(255,255,255,0.5); position: fixed; display: block; width: 30px; height: 30px; bottom: 10px; right: ' + ((window.screen.width - 48) / 2) + 'px; margin: 6px; box-shadow: 1px 1px 3px #000000; z-index: 65537;');
+    containerEl.setAttribute('style', 'right: ' + ((window.screen.width - 48) / 2) + ' px;');
 
     var dragStartX, dragStartY, dragMoveX, dragMoveY, dragDeltaX, dragDeltaY,
       btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer,
