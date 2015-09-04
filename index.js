@@ -1,7 +1,7 @@
 /* global ScreenLayout, Event */
 
 (function($$) {
-  //var MANIFEST_URL = 'app://86151599-3c67-5d4e-93a7-9160fa04c014/manifest.webapp';
+  //var MANIFEST_URL = 'app://fa188ee8-9285-564d-99b0-5314c9ecf40e/manifest.webapp';
   var MANIFEST_URL = 'https://elin-moco.github.io/fxos-addon-draggable-home-btn/manifest.webapp';
   var TAP_THRESHOLD = 18;
   var LONG_TAP_THRESHOLD = 36;
@@ -187,7 +187,7 @@
 
   navigator.mozApps.mgmt.onenabledstatechange = function(event) {
     var app = event.application;
-    if (app.manifestURL == MANIFEST_URL && !app.enabled) {
+    if (app.manifestURL === MANIFEST_URL && !app.enabled) {
       uninitialize();
     }
   };
