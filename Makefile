@@ -1,2 +1,2 @@
 package:
-	zip extension.zip index.js manifest.json -r icons
+	zip extension.zip index.js index.css manifest.json -r icons
