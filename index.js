@@ -39,7 +39,6 @@
   }
 
   function initialize() {
-
     sl_getSettingsLock().set({'software-button.enabled': false});
     // Remove existing control, for when this addon is re-run.
     var existingContainerEl = $$('draggable-home');
@@ -53,7 +52,7 @@
     containerEl.setAttribute('class', 'visible');
     containerEl.setAttribute('data-time-inserted', Date.now());
     containerEl.setAttribute('data-z-index-level', 'software-buttons');
-    containerEl.setAttribute('style', 'right: ' + ((window.screen.width - 48) / 2) + ' px;');
+    containerEl.setAttribute('style', 'right: ' + ((window.screen.width - 48) / 2) + 'px; bottom: 10px;');
 
     var dragStartX, dragStartY, dragMoveX, dragMoveY, dragDeltaX, dragDeltaY,
       btnBottom, btnRight, touchTime, movement, dragging = false, holdTimer,
