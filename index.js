@@ -1,8 +1,6 @@
 /* global ScreenLayout, Event */
 
 (function($$) {
-  //var MANIFEST_URL = 'app://fa188ee8-9285-564d-99b0-5314c9ecf40e/manifest.webapp';
-  var MANIFEST_URL = 'https://elin-moco.github.io/fxos-addon-draggable-home-btn/manifest.webapp';
   var TAP_THRESHOLD = 18;
   var LONG_TAP_THRESHOLD = 36;
   var _lock;
@@ -179,15 +177,19 @@
       sl_getSettingsLock().set({'software-button.enabled': true});
     }
     var existingContainerEl = $$('draggable-home');
-    existingContainerEl.parentNode.removeChild(existingContainerEl);
+    if (existingContainerEl) {
+      existingContainerEl.parentNode.removeChild(existingContainerEl);
+    }
     window.removeEventListener('lockscreen-appclosed', onScreenUnlocked);
     window.removeEventListener('lockscreen-appopened', onScreenLocked);
+    navigator.mozApps.mgmt.removeEventListener('enabledstatechange', onEnabledStateChange);
   }
 
-  navigator.mozApps.mgmt.onenabledstatechange = function(event) {
+  function onEnabledStateChange(event) {
     var app = event.application;
-    if (app.manifestURL === MANIFEST_URL && !app.enabled) {
+    if (app.manifest.name === 'System - Draggable Home Button' && !app.enabled) {
       uninitialize();
     }
-  };
+  }
+  navigator.mozApps.mgmt.addEventListener('enabledstatechange', onEnabledStateChange);
 }(document.getElementById.bind(document)));
