@@ -191,5 +191,14 @@
       uninitialize();
     }
   }
+
+  function onUninstall(event) {
+    navigator.mozApps.mgmt.removeEventListener('uninstall', onUninstall);
+    var app = event.application;
+    if (app.manifest.name === 'System - Draggable Home Button') {
+      uninitialize();
+    }
+  }
   navigator.mozApps.mgmt.addEventListener('enabledstatechange', onEnabledStateChange);
+  navigator.mozApps.mgmt.addEventListener('uninstall', onUninstall);
 }(document.getElementById.bind(document)));
